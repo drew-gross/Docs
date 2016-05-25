@@ -1,11 +1,25 @@
 # Contributing to Parse Docs
+
 We want to make contributing to this project as easy and transparent as possible.
 
-## Code of Conduct
+### Code of Conduct
 Facebook has adopted a Code of Conduct that we expect project participants to adhere to. Please read [the full text](https://code.facebook.com/codeofconduct) so that you can understand what actions will and will not be tolerated.
 
-## Our Documentation Process
-Most of our work will be done in public directly on GitHub. There may be changes done through our internal source control, but it will be rare and only as needed.
+### Structure
+
+The guides are organized first by language, then by platform. Each platform directory contains a set of markdown files, one for each main section in the guide.
+
+    .
+    ├── {language}
+    │   └── {platform}
+    │   │   └── {section}
+    │   └── common
+    │       └── {section}
+    ├── .gitignore
+    ├── tokens.json
+    └── README.md
+
+For example, `/en/ios/` contains all of sections for the iOS guide in English. You'll notice a `common` folder in each language. This folder contains content that is shared amongst all of the platforms. That helps us avoid duplicating content unnecessarily.
 
 ### Pull Requests
 We actively welcome your pull requests. We'll need to get a core member to sign off on the changes and then merge the pull request. We'll do our best to provide updates and feedback throughout the process.

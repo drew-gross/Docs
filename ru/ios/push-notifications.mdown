@@ -136,12 +136,12 @@ installation[@"user"] = [PFUser currentUser];
 
 #### Отправка уведомлений в ответ на запросы
 
-После сохранения данных для объектов `Installation` можно использовать запрос `PFQuery` для таргетирования подкласса этих устройств. Запросы `Installation` работают так же, как и другие [запросы Parse](#queries), однако для создания используется специальный статический метод `[PFInstallation query]`. Перед отправкой уведомления этот запрос настраивается для объекта `PFPush`.
+После сохранения данных для объектов `Installation` можно использовать запрос `%{ParseQuery}` для таргетирования подкласса этих устройств. Запросы `Installation` работают так же, как и другие [запросы Parse](#queries), однако для создания используется специальный статический метод `[PFInstallation query]`. Перед отправкой уведомления этот запрос настраивается для объекта `PFPush`.
 
 ```objc
 // Create our Installation query
 PFQuery *pushQuery = [PFInstallation query];
-[pushQuery whereKey:@"injuryReports" equalTo:YES];
+[pushQuery whereKey:@"injuryReports" equalTo:@YES];
 // Send push notification to query
 PFPush *push = [[PFPush alloc] init];
 [push setQuery:pushQuery];
@@ -157,7 +157,7 @@ PFPush *push = [[PFPush alloc] init];
 PFQuery *pushQuery = [PFInstallation query];
 [pushQuery whereKey:@"channels" equalTo:@"Giants"];
 // Set channel
-[pushQuery whereKey:@"scores" equalTo:YES];
+[pushQuery whereKey:@"scores" equalTo:@YES];
 // Send push notification to query
 PFPush *push = [[PFPush alloc] init];
 [push setQuery:pushQuery];

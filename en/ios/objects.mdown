@@ -2,7 +2,7 @@
 
 ## The PFObject
 
-Storing data on Parse is built around the `ParseObject`. Each `ParseObject` contains key-value pairs of JSON-compatible data. This data is schemaless, which means that you don't need to specify ahead of time what keys exist on each `ParseObject`. You simply set whatever key-value pairs you want, and our backend will store it.
+Storing data on Parse is built around the `%{ParseObject}`. Each `%{ParseObject}` contains key-value pairs of JSON-compatible data. This data is schemaless, which means that you don't need to specify ahead of time what keys exist on each `%{ParseObject}`. You simply set whatever key-value pairs you want, and our backend will store it.
 
 For example, let's say you're tracking high scores for a game. A single `%{ParseObject}` could contain:
 
@@ -12,7 +12,7 @@ score: 1337, playerName: "Sean Plott", cheatMode: false
 
 Keys must be alphanumeric strings. Values can be strings, numbers, booleans, or even arrays and dictionaries - anything that can be JSON-encoded.
 
-Each `ParseObject` has a class name that you can use to distinguish different sorts of data. For example, we could call the high score object a `GameScore`. We recommend that you NameYourClassesLikeThis and nameYourKeysLikeThis, just to keep your code looking pretty.
+Each `%{ParseObject}` has a class name that you can use to distinguish different sorts of data. For example, we could call the high score object a `GameScore`. We recommend that you NameYourClassesLikeThis and nameYourKeysLikeThis, just to keep your code looking pretty.
 
 ## Saving Objects
 
@@ -57,11 +57,11 @@ There are two things to note here. You didn't have to configure or set up a new 
 
 There are also a few fields you don't need to specify that are provided as a convenience. `objectId` is a unique identifier for each saved object. `createdAt` and `updatedAt` represent the time that each object was created and last modified in the Parse Cloud. Each of these fields is filled in by Parse, so they don't exist on a `%{ParseObject}` until a save operation has completed.
 
-Note: You can use the `saveInBackgroundWithBlock` or `saveInBackgroundWithTarget:selector:` methods to provide additional logic which will run after the save completes.
+Note: You can use the `saveInBackgroundWithBlock` method to provide additional logic to run after the save completes.
 
 ## Retrieving Objects
 
-Saving data to the cloud is fun, but it's even more fun to get that data out again. If you have the `objectId`, you can retrieve the whole `%{ParseObject}` using a `PFQuery`.  This is an asynchronous method, with variations for using either blocks or callback methods:
+Saving data to the cloud is fun, but it's even more fun to get that data out again. If you have the `objectId`, you can retrieve the whole `%{ParseObject}` using a `%{ParseQuery}`.  This is an asynchronous method, with variations for using either blocks or callback methods:
 
 ```objc
 PFQuery *query = [PFQuery queryWithClassName:@"GameScore"];
@@ -78,9 +78,9 @@ var query = PFQuery(className:"GameScore")
 query.getObjectInBackgroundWithId("xWMyZEGZ") {
   (gameScore: PFObject?, error: NSError?) -> Void in
   if error == nil && gameScore != nil {
-    println(gameScore)
+    print(gameScore)
   } else {
-    println(error)
+    print(error)
   }
 }
 ```
@@ -146,7 +146,7 @@ As with saving, this recursively stores every object and file that `gameScore` p
 
 ### Retrieving Objects from the Local Datastore
 
-Storing an object is only useful if you can get it back out. To get the data for a specific object, you can use a `PFQuery` just like you would while on the network, but using the `fromLocalDatastore` method to tell it where to get the data.
+Storing an object is only useful if you can get it back out. To get the data for a specific object, you can use a `%{ParseQuery}` just like you would while on the network, but using the `fromLocalDatastore` method to tell it where to get the data.
 
 ```objc
 PFQuery *query = [PFQuery queryWithClassName:@"GameScore"];
@@ -237,7 +237,7 @@ gameScore.saveEventually()
 
 ## Updating Objects
 
-Updating an object is simple. Just set some new data on it and call one of the save methods. Assuming you have saved the object and have the `objectId`, you can retrieve the `%{ParseObject}` using a `PFQuery` and update its data:
+Updating an object is simple. Just set some new data on it and call one of the save methods. Assuming you have saved the object and have the `objectId`, you can retrieve the `%{ParseObject}` using a `%{ParseQuery}` and update its data:
 
 ```objc
 PFQuery *query = [PFQuery queryWithClassName:@"GameScore"];
@@ -257,7 +257,7 @@ var query = PFQuery(className:"GameScore")
 query.getObjectInBackgroundWithId("xWMyZEGZ") {
   (gameScore: PFObject?, error: NSError?) -> Void in
   if error != nil {
-    println(error)
+    print(error)
   } else if let gameScore = gameScore {
     gameScore["cheatMode"] = true
     gameScore["score"] = 1338
@@ -353,10 +353,6 @@ gameScore.saveInBackground()
 ## Relational Data
 
 Objects can have relationships with other objects. To model this behavior, any `%{ParseObject}` can be used as a value in other `%{ParseObject}`s. Internally, the Parse framework will store the referred-to object in just one place, to maintain consistency.
-
-<div class='tip info'><div>
-  Watch the [One-To-Many Relationships](/tutorials/one-to-many-relationships) tutorial, where you'll learn how to create a one-to-many relationship between two `PFObjects` in a simple blogging application.
-</div></div>
 
 For example, each `Comment` in a blogging app might correspond to one `Post`. To create a new `Post` with a single `Comment`, you could write:
 
@@ -459,7 +455,7 @@ You can remove a post from the `PFRelation` with something like:
 relation.removeObject(post)
 ```
 
-By default, the list of objects in this relation are not downloaded.  You can get the list of `Post`s by using calling `findObjectsInBackgroundWithBlock:` on the `PFQuery` returned by `query`.  The code would look like:
+By default, the list of objects in this relation are not downloaded.  You can get the list of `Post`s by using calling `findObjectsInBackgroundWithBlock:` on the `%{ParseQuery}` returned by `query`.  The code would look like:
 
 ```objc
 [[relation query] findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
@@ -472,7 +468,7 @@ By default, the list of objects in this relation are not downloaded.  You can ge
 ```
 ```swift
 relation.query().findObjectsInBackgroundWithBlock {
-  (objects: [AnyObject]?, error: NSError?) -> Void in
+  (objects: [PFObject]?, error: NSError?) -> Void in
   if let error = error {
     // There was an error
   } else {
@@ -481,7 +477,7 @@ relation.query().findObjectsInBackgroundWithBlock {
 }
 ```
 
-If you want only a subset of the `Post`s you can add extra constraints to the `PFQuery` returned by `query` like this:
+If you want only a subset of the `Post`s you can add extra constraints to the `%{ParseQuery}` returned by `query` like this:
 
 ```objc
 PFQuery *query = [relation query];
@@ -492,42 +488,51 @@ var query = relation.query()
 // Add other query constraints.
 ```
 
-For more details on `PFQuery` please look at the query portion of this guide.  A `PFRelation` behaves similar to an `NSArray` of `%{ParseObject}`, so any queries you can do on arrays of objects (other than `includeKey:`) you can do on `PFRelation`.
+For more details on `%{ParseQuery}` please look at the query portion of this guide.  A `PFRelation` behaves similar to an `NSArray` of `%{ParseObject}`, so any queries you can do on arrays of objects (other than `includeKey:`) you can do on `PFRelation`.
 
 ## Data Types
 
-So far we've used values with type `NSString`, `NSNumber`, and `%{ParseObject}`. Parse also supports `NSDate`, `NSData`, and `NSNull`. 
+So far we've used values with type `%{string}`, `%{integer}`, and `%{ParseObject}`. Parse also supports `%{date}`, `%{map}`, `%{array}`, and `%{null}`. You can nest `%{map}` and `%{array}` objects to store more structured data within a single `%{ParseObject}`. Overall, the following types are allowed for each field in your object:
 
-You can nest `NSDictionary` and `NSArray` objects to store more structured data within a single `%{ParseObject}`.
+* String => `%{string}`
+* Number => `%{integer}`
+* Bool => `%{bool}`
+* Array => `%{array}`
+* Object => `%{map}`
+* Date => `%{date}`
+* File => `%{ParseFile}`
+* Pointer => other `%{ParseObject}`
+* Relation => `%{ParseRelation}`
+* Null => `%{null}`
 
 Some examples:
 
 ```objc
 NSNumber *number = @42;
+NSNumber *bool = @NO;
 NSString *string = [NSString stringWithFormat:@"the number is %@", number];
 NSDate *date = [NSDate date];
-NSData *data = [@"foo" dataUsingEncoding:NSUTF8StringEncoding];
 NSArray *array = @[string, number];
-NSDictionary *dictionary = @{@"number": number,      @"string": string};
+NSDictionary *dictionary = @{@"number": number, @"string": string};
 NSNull *null = [NSNull null];
 PFObject *pointer = [PFObject objectWithoutDataWithClassName:@"MyClassName" objectId:@"xyz"];
 
 PFObject *bigObject = [PFObject objectWithClassName:@"BigObject"];
 bigObject[@"myNumberKey"] = number;
+bigObject[@"myBoolKey"] = bool;
 bigObject[@"myStringKey"] = string;
 bigObject[@"myDateKey"] = date;
-bigObject[@"myBytesKey"] = data; // shows up as 'bytes' in the Data Browser
 bigObject[@"myArrayKey"] = array;
 bigObject[@"myObjectKey"] = dictionary; // shows up as 'object' in the Data Browser
-bigObject[@"myNullKey"] = null;
+bigObject[@"anyKey"] = null; // this value can only be saved to an existing key
 bigObject[@"myPointerKey"] = pointer; // shows up as Pointer <MyClassName> in the Data Browser
 [bigObject saveInBackground];
 ```
 ```swift
 let number = 42
+let bool = false
 let string = "the number is \(number)"
 let date = NSDate()
-let data = "foo".dataUsingEncoding(NSUTF8StringEncoding)
 let array = [string, number]
 let dictionary = ["number": number, "string": string]
 let null = NSNull()
@@ -535,19 +540,19 @@ let pointer = PFObject(objectWithoutDataWithClassName:"MyClassName", objectId: "
 
 var bigObject = PFObject(className:"BigObject")
 bigObject["myNumberKey"] = number
+bigObject["myBooleanKey"] = bool
 bigObject["myStringKey"] = string
 bigObject["myDateKey"] = date
-bigObject["myBytesKey"] = data // shows up as 'bytes' in the Data Browser
 bigObject["myArrayKey"] = array
 bigObject["myObjectKey"] = dictionary // shows up as 'object' in the Data Browser
-bigObject["myNullKey"] = null
+bigObject["anyKey"] = null // this value can only be saved to an existing key
 bigObject["myPointerKey"] = pointer // shows up as Pointer <MyClassName> in the Data Browser
 bigObject.saveInBackground()
 ```
 
-We do not recommend storing large pieces of binary data like images or documents using `NSData` fields on `%{ParseObject}`. `%{ParseObject}`s should not exceed 128 kilobytes in size. To store more, we recommend you use `%{ParseFile}`. See [Files](#files) for more details.
+We do not recommend storing large pieces of binary data like images or documents on `%{ParseObject}`. `%{ParseObject}`s should not exceed 128 kilobytes in size. We recommend you use `%{ParseFile}`s to store images, documents, and other types of files. You can do so by instantiating a `%{ParseFile}` object and setting it on a field. See [Files](#files) for more details.
 
-For more information about how Parse handles data, check out our [Data](#data) documentation.
+For more information about how Parse handles data, check out our documentation on [Data](#data).
 
 ## Subclasses
 
@@ -581,14 +586,14 @@ shield.fireProof = false
 shield.rupees = 50
 ```
 
-## Subclassing PFObject
+### Subclassing PFObject
 
 To create a `%{ParseObject}` subclass:
 
 1.  Declare a subclass which conforms to the `PFSubclassing` protocol.
 2.  Implement the class method `parseClassName`. This is the string you would pass to `initWithClassName:` and makes all future class name references unnecessary.
 3.  Import `PFObject+Subclass` in your .m file. This implements all methods in `PFSubclassing` beyond `parseClassName`.
-4.  Call `[YourClass registerSubclass]` before Parse `setApplicationId:clientKey:`. 
+4.  Call `[YourClass registerSubclass]` before Parse `setApplicationId:clientKey:`.
 
 An easy way to do this is with your class' [+load](https://developer.apple.com/library/ios/documentation/cocoa/reference/foundation/classes/nsobject_class/reference/reference.html#//apple_ref/occ/clm/NSObject/load) (Obj-C only) or with [initialize](https://developer.apple.com/library/ios/documentation/Cocoa/Reference/Foundation/Classes/NSObject_Class/#//apple_ref/occ/clm/NSObject/initialize) (both Obj-C and Swift) methods.
 
@@ -641,7 +646,7 @@ class Armor : PFObject, PFSubclassing {
 }
 ```
 
-## Properties & Methods
+### Properties & Methods
 
 Adding custom properties and methods to your `%{ParseObject}` subclass helps encapsulate logic about the class. With `PFSubclassing`, you can keep all your logic about a subject in one place rather than using separate classes for business logic and storage/transmission logic.
 
@@ -697,7 +702,7 @@ If you need more complicated logic than simple property access, you can declare 
   PFImageView *view = [[PFImageView alloc] initWithImage:kPlaceholderImage];
   view.file = self.iconFile;
   [view loadInBackground];
-  return [view autorelease];
+  return view;
 }
 ```
 ```swift
@@ -711,6 +716,6 @@ func iconView() -> UIImageView {
 }
 ```
 
-## Initializing Subclasses
+### Initializing Subclasses
 
 You should create new objects with the `object` class method. This constructs an autoreleased instance of your type and correctly handles further subclassing. To create a reference to an existing object, use `objectWithoutDataWithObjectId:`.

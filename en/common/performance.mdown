@@ -64,6 +64,23 @@ let query = PFQuery.queryWithClassName("GameScore")
 query.whereKey("score", equalTo: 50)
 query.whereKey("playerName", containedIn: ["Jonathan Walsh", "Dario Wunsch", "Shawn Simon"])
 ```
+```common-java
+ParseQuery<ParseObject> query = ParseQuery.getQuery("GameScore");
+query.whereEqualTo("score", 50);
+query.whereContainedIn("playerName", Arrays.asList("Jonathan Walsh", "Dario Wunsch", "Shawn Simon"));
+```
+```common-csharp
+var names = new[] { "Jonathan Walsh", "Dario Wunsch", "Shawn Simon" };
+var query = new ParseObject.GetQuery("GameScore")
+    .WhereEqualTo("score", 50)
+    .WhereContainedIn("playerName", names);
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
 Creating an index query based on the score field would yield a smaller search space in general than creating one on the playerName field.
 
@@ -78,8 +95,20 @@ query.equalTo("cheatMode", false);
 ```common-swift
 query.whereKey("cheatMode", equalTo: false)
 ```
+```common-java
+query.whereEqualTo("cheatMode", false);
+```
+```common-csharp
+query.WhereEqualTo("cheatMode", false);
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
-The two possible values for cheatMode are true and false. If an index was added on this field it would be of little use because it's likely that 50% of the records will have to be looked at to return query results.
+The two possible values for `"cheatMode"` are `true` and `false`. If an index was added on this field it would be of little use because it's likely that 50% of the records will have to be looked at to return query results.
 
 We also throw out relations and join tables, since no values are stored for these keys. We heavily promote GeoPoints since MongoDB won’t run a geo query without a geo index. Other data types are ranked by their expected entropy of the value space for the key:
 
@@ -137,8 +166,31 @@ query.findObjectsInBackgroundWithBlock {
   }
 }
 ```
+```common-java
+ParseQuery<ParseObject> query = ParseQuery.getQuery("GameScore");
+query.whereNotEqualTo("playerName", "Michael Yabuti");
+query.findInBackground(new FindCallback<ParseObject>() {
+  @Override
+  public void done(List<ParseObject> list, ParseException e) {
+    if ( e == null) {
+      // Retrieved scores successfully
+    }
+  }
+});
+```
+```common-csharp
+var results = await ParseObject.GetQuery("GameScore")
+    .WhereNotEqualTo("playerName", "Michael Yabuti")
+    .FindAsync();
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
-This query can't take advantage of indexes. The database has to look at all the objects in the GameScore class to satisfy the constraint and retrieve the results. As the number of entries in the class grows, the query takes longer to run.
+This query can't take advantage of indexes. The database has to look at all the objects in the `"GameScore"` class to satisfy the constraint and retrieve the results. As the number of entries in the class grows, the query takes longer to run.
 
 Luckily, most of the time a “Not Equal To” query condition can be rewritten as a “Contained In” condition. Instead of querying for the absence of values, you ask for values which match the rest of the column values. Doing this allows the database to use an index and your queries will be faster.
 
@@ -156,6 +208,20 @@ PFQuery *query = [PFUser query];
 var query = PFUser.query()
 query.whereKey("state", notEqualTo: "Invited")
 ```
+```common-java
+ParseQuery<ParseUser> query = ParseQuery.getQuery(ParseUser.class);
+query.whereNotEqualTo("state", "Invited");
+```
+```common-csharp
+var query = ParseUser.Query
+    .WhereNotEqualTo("state", "Invited");
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
 It would be faster to use the “Contained In” condition when setting up the query:
 
@@ -169,8 +235,20 @@ query.containedIn("state", ["SignedUp", "Verified"]);
 ```common-swift
 query.whereKey("state", containedIn: ["SignedUp", "Verified"])
 ```
+```common-java
+query.whereContainedIn("state", Arrays.asList("SignedUp", "Verified"));
+```
+```common-csharp
+query.WhereContainedIn("state", new[] { "SignedUp", "Verified" });
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
-Sometimes, you may have to completely rewrite your query. Going back to the GameScore example, let's say we were running that query to display players who had scored higher than the given player. We could do this differently, by first getting the given player's high score and then using the following query:
+Sometimes, you may have to completely rewrite your query. Going back to the `"GameScore"` example, let's say we were running that query to display players who had scored higher than the given player. We could do this differently, by first getting the given player's high score and then using the following query:
 
 ```common-js
 var GameScore = Parse.Object.extend("GameScore");
@@ -202,6 +280,31 @@ query.findObjectsInBackgroundWithBlock {
   }
 }
 ```
+```common-java
+ParseQuery<ParseObject> query = ParseQuery.getQuery("GameScore");
+// Previously retrieved highScore for Michael Yabuti
+query.whereGreaterThan("score", highScore);
+query.findInBackground(new FindCallback<ParseObject>() {
+  @Override
+  public void done(List<ParseObject> list, ParseException e) {
+    if (e == null) {
+      // Retrieved scores successfully
+    }
+  }
+});
+```
+```common-csharp
+// Previously retrieved highScore for Michael Yabuti
+var results = await ParseObject.GetQuery("GameScore")
+    .WhereGreaterThan("score", highScore)
+    .FindAsync();
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
 The new query you use depends on your use case. This may sometimes mean a redesign of your data model.
 
@@ -219,7 +322,21 @@ PFQuery *query = [PFUser query];
 ```
 ```common-swift
 var query = PFUser.query()
-query.whereKey("state", containedIn: ["Invited", "Blocked"])
+query.whereKey("state", notContainedIn: ["Invited", "Blocked"])
+```
+```common-java
+ParseQuery<ParseUser> query = ParseQuery.getQuery(ParseUser.class);
+query.whereNotContainedIn("state", Arrays.asList("Invited", "Blocked"));
+```
+```common-csharp
+var query = ParseUser.Query
+    .WhereNotContainedIn("state", new[] { "Invited", "Blocked" });
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
 ```
 
 Using a complimentary “Contained In” query constraint will always be faster:
@@ -228,10 +345,22 @@ Using a complimentary “Contained In” query constraint will always be faster:
 query.containedIn("state", ["SignedUp", "Verified"]);
 ```
 ```common-objc
-query whereKey:@"state" containedIn:@[@"SignedUp", @"Verified"]];
+[query whereKey:@"state" containedIn:@[@"SignedUp", @"Verified"]];
 ```
 ```common-swift
 query.whereKey("state", containedIn: ["SignedUp", "Verified"])
+```
+```common-java
+query.whereContainedIn("state", Arrays.asList("SignedUp", "Verified"));
+```
+```common-csharp
+query.WhereContainedIn("state", new[] { "SignedUp", "Verified"});
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
 ```
 
 This means rewriting your queries accordingly. Your query rewrites will depend on your schema set up. It may mean redoing that schema.
@@ -240,7 +369,7 @@ This means rewriting your queries accordingly. Your query rewrites will depend o
 
 Most regular expression queries in Parse are heavily throttled due to performance considerations. MongoDB is not efficient for doing partial string matching except for the special case where you only want a prefix match. Queries that have regular expression constraints are therefore very expensive, especially for classes with over 100,000 records. Parse restricts how many such operations can be run on a particular app at any given time.
 
-You should avoid using regular expression constraints that don't use indexes. For example, the following query looks for data with a given string in the playerName field. The string search is case insensitive:
+You should avoid using regular expression constraints that don't use indexes. For example, the following query looks for data with a given string in the `"playerName"` field. The string search is case insensitive and therefore cannot be indexed:
 
 ```common-js
 query.matches("playerName", "Michael", “i”);
@@ -251,8 +380,20 @@ query.matches("playerName", "Michael", “i”);
 ```common-swift
 query.whereKey("playerName", matchesRegex: "Michael", modifiers: "i")
 ```
+```common-java
+query.whereMatches("playerName", "Michael", "i");
+```
+```common-csharp
+query.WhereMatches("playerName", "Michael", "i")
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
-A similar query looks for any occurrence of the string in the field, however the search is case sensitive:
+The following query, while case sensitive, looks for any occurrence of the string in the field and cannot be indexed:
 
 ```common-js
 query.contains("playerName", "Michael");
@@ -263,8 +404,20 @@ query.contains("playerName", "Michael");
 ```common-swift
 query.whereKey("playerName", containsString: "Michael")
 ```
+```common-java
+query.whereContains("playerName", "Michael");
+```
+```common-csharp
+query.WhereContains("playerName", "Michael")
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
-These queries are both slow. Depending on your use case, you should switch to using the following constraint that uses an index:
+These queries are both slow. In fact, the `matches` and `contains` query constraints are not covered in our querying guides on purpose and we do not recommend using them. Depending on your use case, you should switch to using the following constraint that uses an index, such as:
 
 ```common-js
 query.startsWith("playerName", "Michael");
@@ -275,10 +428,22 @@ query.startsWith("playerName", "Michael");
 ```common-swift
 query.whereKey("playerName", hasPrefix: "Michael")
 ```
+```common-java
+query.whereStartsWith("playerName", "Michael");
+```
+```common-csharp
+query.WhereStartsWith("playerName", "Michael")
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
 This looks for data that starts with the given string. This query will use the backend index, so it will be faster even for large datasets.
 
-As a best practice, when you use regular expression constraints, you'll want to ensure that other constraints in the query reduce the result set to the order of hundreds of objects to make the query efficient. If you must use the matches()constraint for legacy reasons, then use case sensitive, anchored queries where possible, for example:
+As a best practice, when you use regular expression constraints, you'll want to ensure that other constraints in the query reduce the result set to the order of hundreds of objects to make the query efficient. If you must use the `matches` or `contains` constraints for legacy reasons, then use case sensitive, anchored queries where possible, for example:
 
 ```common-js
 query.matches("playerName", "^Michael");
@@ -288,6 +453,18 @@ query.matches("playerName", "^Michael");
 ```
 ```common-swift
 query.whereKey("playerName", matchesRegex: "^Michael")
+```
+```common-java
+query.whereMatches("playerName", "^Michael");
+```
+```common-csharp
+query.WhereMatches("playerName", "^Michael")
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
 ```
 
 Most of the use cases around using regular expressions involve implementing search. A more performant way of implementing search is detailed later.
@@ -306,6 +483,18 @@ query.limit = 10; // limit to at most 10 results
 ```
 ```common-swift
 query.limit = 10 // limit to at most 10 results
+```
+```common-java
+query.setLimit(10); // limit to at most 10 results
+```
+```common-csharp
+query.Limit(10); // limit to at most 10 results
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
 ```
 
 If you're issuing queries on GeoPoints, make sure you specify a reasonable radius:
@@ -335,6 +524,29 @@ query.findObjectsInBackgroundWithBlock {
     // List of places within 10 miles of a user's location
   }
 }
+```
+```common-java
+ParseQuery<ParseObject> query = ParseQuery.getQuery("Place");
+query.whereWithinMiles("location", userGeoPoint, 10.0);
+query.findInBackground(new FindCallback<ParseObject>() {
+  @Override
+  public void done(List<ParseObject> list, ParseException e) {
+    if (e == null) {
+      // List of places within 10 miles of a user's location
+    }
+  }
+});
+```
+```common-csharp
+var results = await ParseObject.GetQuery("GameScore")
+    .WhereWithinDistance("location", userGeoPoint, ParseGeoDistance.FromMiles(10.0))
+    .FindAsync();
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
 ```
 
 You can further limit the fields returned by calling select:
@@ -366,6 +578,30 @@ query.findObjectsInBackgroundWithBlock {
   }
 }
 ```
+```common-java
+ParseQuery<ParseObject> query = ParseQuery.getQuery("GameScore");
+query.selectKeys(Arrays.asList("score", "playerName"));
+query.findInBackground(new FindCallback<ParseObject>() {
+  @Override
+  public void done(List<ParseObject> list, ParseException e) {
+    if (e == null) {
+      // each of results will only have the selected fields available.
+    }
+  }
+});
+```
+```common-csharp
+var results = await ParseObject.GetQuery("GameScore")
+     .Select(new[] { "score", "playerName" })
+     .FindAsync();
+// each of results will only have the selected fields available.
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
 ## Client-side Caching
 
@@ -377,7 +613,7 @@ Cloud Code allows you to run custom JavaScript logic on Parse instead of on the 
 
 You can use this to off load processing to the Parse servers thus increasing your app's perceived performance.  You can create hooks that run whenever an object is saved or deleted. This is useful if you want to validate or sanitize your data. You can also use Cloud Code to modify related objects or kick off other processes such as sending off a push notification. There are time limits to how long Cloud Code can run, for example an `afterSave` hook only has 3 seconds to run. You can use Background Jobs if you need to run more time consuming processes such as data migrations.
 
-We saw examples of limiting the data returned by writing restrictive queries. You can also use [Cloud Functions](/docs/js/guide#cloud-code-cloud-functions) to help limit the amount of data returned to your app. In the following example, we use a Cloud Function to get a movie's average rating:
+We saw examples of limiting the data returned by writing restrictive queries. You can also use [Cloud Functions](/docs/cloudcode/guide#cloud-code-cloud-functions) to help limit the amount of data returned to your app. In the following example, we use a Cloud Function to get a movie's average rating:
 
 ```js
 Parse.Cloud.define("averageStars", function(request, response) {
@@ -398,8 +634,13 @@ Parse.Cloud.define("averageStars", function(request, response) {
 
 You could have ran a query on the Review class on the client, returned only the stars field data and computed the result on the client. As the number of reviews for a movie increases you can see that the data being returned to the device using this methodology also increases. Implementing the functionality through a Cloud Function returns the one result if successful.
 
-As you look at optimizing your queries, you'll find that you may have to change the queries - sometimes even after you've shipped your app to the App Store or Google Play. The ability to change your queries without a client update is possible if you use [Cloud Functions](/docs/js/guide#cloud-code-cloud-functions). Even if you have to redesign your schema, you could make all the changes in your Cloud Functions while keeping the client interface the same to avoid an app update. Take the average ratings Cloud Function example from before, calling it from a client SDK would look like this:
+As you look at optimizing your queries, you'll find that you may have to change the queries - sometimes even after you've shipped your app to the App Store or Google Play. The ability to change your queries without a client update is possible if you use [Cloud Functions](/docs/cloudcode/guide#cloud-code-cloud-functions). Even if you have to redesign your schema, you could make all the changes in your Cloud Functions while keeping the client interface the same to avoid an app update. Take the average stars Cloud Function example from before, calling it from a client SDK would look like this:
 
+```command-js
+Parse.Cloud.run("averageStars", { "movie": "The Matrix" }).then(function(ratings) {
+  // ratings is 4.5
+});
+```
 ```common-objc
 [PFCloud callFunctionInBackground:@"averageStars"
                   withParameters:@{@"movie": @"The Matrix"}
@@ -416,6 +657,35 @@ PFCloud.callFunctionInBackground("averageStars", withParameters: ["movie": "The 
     // ratings is 4.5
   }
 }
+```
+```common-java
+HashMap<String, String> params = new HashMap();
+params.put("movie", "The Matrix");
+ParseCloud.callFunctionInBackground("averageStars", params, new FunctionCallback<Float>() {
+  @Override
+  public void done(Float aFloat, ParseException e) {
+    if (e == null) {
+      // ratings is 4.5
+    }
+  }
+});
+```
+```common-csharp
+IDictionary<string, object> dictionary = new Dictionary<string, object>
+{
+    { "movie", "The Matrix" }
+};
+
+ParseCloud.CallFunctionAsync<float>("averageStars", dictionary).ContinueWith(t => {
+  var result = t.Result;
+  // result is 4.5
+});
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
 ```
 
 If later on, you need to modify the underlying data model, your client call can remain the same, as long as you return back a number that represents the ratings result.
@@ -455,6 +725,31 @@ query.countObjectsInBackgroundWithBlock {
     // Request succeeded
   }
 }
+```
+```common-java
+ParseQuery<ParseObject> query = ParseQuery.getQuery("Review");
+// movieId corresponds to a given movie's id
+query.whereEqualTo("movie", movieId);
+query.countInBackground(new CountCallback() {
+  @Override
+  public void done(int i, ParseException e) {
+    if ( e == null) {
+      // Request succeeded
+    }
+  }
+});
+```
+```common-csharp
+var count = await ParseObject.GetQuery("Review")
+// movieId corresponds to a given movie's id
+    .WhereEqualTo("movie", movieId)
+    .CountAsync();
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
 ```
 
 If you run the count query for each of the UI elements, they will not run efficiently on large data sets. One approach to avoid using the `count()` operator could be to add a field to the Movie class that represents the review count for that movie. When saving an entry to the Review class you could increment the corresponding movie's review count field. This can be done in an `afterSave` handler:
@@ -503,6 +798,28 @@ query.findObjectsInBackgroundWithBlock {
     // Results include the reviews count field
   }
 }
+```
+```common-java
+ParseQuery<ParseObject> query = ParseQuery.getQuery("Movie");
+query.findInBackground(new FindCallback<ParseObject>() {
+  @Override
+  public void done(List<ParseObject> list, ParseException e) {
+    if (e == null) {
+      // Results include the reviews count field
+    }
+  }
+});
+```
+```common-csharp
+var results = await ParseObject.GetQuery("Movie")
+    .FindAsync();
+// Results include the reviews count field
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
 ```
 
 You could also use a separate Parse Object to keep track of counts for each review. Whenever a review gets added or deleted, you can increment or decrement the counts in an `afterSave` or `afterDelete` Cloud Code handler. The approach you choose depends on your use case.
@@ -567,6 +884,29 @@ query.findObjectsInBackgroundWithBlock {
   }
 }
 ```
+```common-java
+ParseQuery<ParseObject> query = ParseQuery.getQuery("Post");
+query.whereContainsAll("hashtags", Arrays.asList("#parse", "#ftw"));
+query.findInBackground(new FindCallback<ParseObject>() {
+  @Override
+  public void done(List<ParseObject> list, ParseException e) {
+    if (e == null) {
+      // Request succeeded
+    }
+  }
+});
+```
+```common-csharp
+var results = await ParseObject.GetQuery("Post")
+    .WhereContainsAll("hashtags", new[] { "#parse", "#ftw" })
+    .FindAsync();
+```
+```common-bash
+# No REST API example
+```
+```common-cpp
+// No C++ example
+```
 
 ## Limits and Other Considerations
 
@@ -614,12 +954,14 @@ There are some limits in place to ensure the API can provide the data you need i
 * JavaScript scripts in Cloud Code are limited to 128 KB.
 * Cloud functions must return within 15 seconds. Use webhooks if you need more time.
 * Cloud save/delete hooks must return within 3 seconds. Use webhooks if you need more time.
-* Webhooks must return within 30 seconds.
 * Background jobs will be terminated after 15 minutes.
+* Cloud Code invocations (such as functions, save/delete hooks, background jobs, and custom endpoint handlers) must use a finite amount of memory (currently 384 MB, but subject to change in the future). This memory is garbage collected by the JavaScript engine, so it is generally not an issue. To allow the garbage collector to do its work, make sure that you aren't saving references to large objects, HTTP response buffers, and other objects to global variables in your script.
+* Webhooks must return within 30 seconds.
 * Apps can run one job concurrently by default, but this can be increased by increasing your requests/second in your [Account Overview](/account) page.
 * Additional background jobs over quota will fail to run. They will not be queued.
 * The `params` payload that is passed to a Cloud Function is limited to 50 MB.
 * When using `console` to log information and errors, the message string will be limited to 1 KB.
 * Only the first 100 messages logged by a Cloud function will be persisted in the Cloud Code logs.
 * `Parse.Cloud.httpRequest` has a 2 second connection timeout. If the connection cannot be established within 2 seconds, you may see a 124 request timed out error.
+* `Parse.Cloud.httpRequest` has a maximum total timeout of 1 minute. This timeout can be further restricted by the maximum timeout of the particular Cloud Code invocation. For instance, before/after save triggers have a maximum timeout of 3 seconds, so the maximum timeout for an HTTP request made within a before/after save trigger is 3 seconds.
 * There is a limit of 8 concurrent outbound `Parse.Cloud.httpRequest` requests per Cloud Code request.

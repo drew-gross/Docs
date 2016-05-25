@@ -8,6 +8,10 @@ Cloud Code is easy to use because it's built on the same JavaScript SDK that pow
 
 Even if you're only familiar with mobile development, we hope you'll find Cloud Code straightforward and easy to use.
 
+## What Cloud Code Is Not
+
+Cloud Code is not Node.js. Both Cloud Code and Node.js are built on the V8 JavaScript engine, but similarities end there. If you're interested in using Node.js with Parse, you can read more about [using Heroku with Parse on our blog](http://blog.parse.com/announcements/introducing-heroku-parse/).
+
 ## Getting Started
 
 On the computer you use for development, you will need to install Parse's command line tool. This will let you manage your code in the Parse Cloud. Visit the [Installation section](#command-line-installation) of the [Command Line Tool guide](#command-line) to learn how to install the tool, set up your Cloud Code directory, and [deploy your code](#command-line-a-simple-function).
@@ -49,9 +53,9 @@ Parse.Cloud.define("averageStars", function(request, response) {
 
 The only difference between using `averageStars` and `hello` is that we have to provide the parameter that will be accessed in `request.params.movie` when we call the Cloud function. Read on to learn more about how Cloud functions can be called.
 
-Cloud functions can be called from any of the client SDKs, as well as through the REST API (go back to our list of [Platforms](/docs) to switch SDKs). For example, to call the Cloud function named `averageStars` with a parameter named `movie`:
+Cloud functions can be called from any of the client SDKs, as well as through the REST API. For example, to call the Cloud function named `averageStars` with a parameter named `movie` from an Android app:
 
-```common-java
+```java
 HashMap<String, Object> params = new HashMap<String, Object>();
 params.put("movie", "The Matrix");
 ParseCloud.callFunctionInBackground("averageStars", params, new FunctionCallback<Float>() {
@@ -62,7 +66,11 @@ ParseCloud.callFunctionInBackground("averageStars", params, new FunctionCallback
    }
 });
 ```
-```common-objc
+
+To call the same Cloud function from an iOS app:
+
+```objc
+// Objective-C
 [PFCloud callFunctionInBackground:@"averageStars"
                    withParameters:@{@"movie": @"The Matrix"}
                             block:^(NSNumber *ratings, NSError *error) {
@@ -71,18 +79,25 @@ ParseCloud.callFunctionInBackground("averageStars", params, new FunctionCallback
   }
 }];
 ```
-```common-swift
+```swift
+// Swift
 PFCloud.callFunctionInBackground("averageRatings", withParameters: ["movie":"The Matrix"]) {
   (response: AnyObject?, error: NSError?) -> Void in
   let ratings = response as? Float
   // ratings is 4.5
 }
 ```
-```common-php
+
+This is how you would call the same Cloud function using PHP:
+
+```php
 $ratings = ParseCloud::run("averageRatings", ["movie" => "The Matrix"]);
 // $ratings is 4.5
 ```
-```common-csharp
+
+The following example shows how you can call the "averageRatings" Cloud function from a .NET C# app such as in the case of Windows 10, Unity, and Xamarin applications:
+
+```csharp
 IDictionary<string, object> params = new Dictionary<string, object>
 {
     { "movie", "The Matrix" }
@@ -92,13 +107,23 @@ ParseCloud.CallFunctionAsync<IDictionary<string, object>>("averageStars", params
   // ratings is 4.5
 });
 ```
-```common-js
-Parse.Cloud.run('averageStars', { movie: 'The Matrix' }, {
-  success: function(ratings) {
-    // ratings should be 4.5
-  },
-  error: function(error) {
-  }
+
+You can also call Cloud functions using the REST API:
+
+```bash
+curl -X POST \
+  -H "X-Parse-Application-Id: ${APPLICATION_ID}" \
+  -H "X-Parse-REST-API-Key: ${REST_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{ "movie": "The Matrix" }' \
+  https://api.parse.com/1/functions/averageStars
+```
+
+And finally, to call the same function from a JavaScript app:
+
+```js
+Parse.Cloud.run('averageStars', { movie: 'The Matrix' }).then(function(ratings) {
+  // ratings should be 4.5
 });
 ```
 
@@ -263,6 +288,12 @@ If you want to use `afterDelete` for a predefined class in the Parse JavaScript 
 
 Cloud functions will be killed after 15 seconds of wall clock time. `beforeSave`, `afterSave`, `beforeDelete`, and `afterDelete` functions will be killed after 3 seconds of run time. If a Cloud function or a `beforeSave`/`afterSave`/`beforeDelete`/`afterDelete` function is called from another Cloud Code call, it will be further limited by the time left in the calling function. For example, if a `beforeSave` function is triggered by a cloud function after it has run for 13 seconds, the `beforeSave` function will only have 2 seconds to run, rather than the normal 3 seconds. If you need additional time to perform operations in Cloud Code, consider using a [background job](#cloud-code-advanced-background-jobs).
 
+### Memory
+
+Cloud Code invocations (such as functions, save/delete hooks, background jobs, and custom endpoint handlers) must use a finite amount of memory (currently 384 MB, but subject to change in the future). This memory is garbage collected by the JavaScript engine, so it is generally not an issue.
+
+To allow the garbage collector to do its work properly, make sure that you aren't saving references to large objects, HTTP response buffers, and other objects to global variables in your script.
+
 ### Network requests
 
 Network requests that are still in progress after `success` or `error` are called will be canceled. In general, you should wait for all network requests to finish before calling `success`. For `afterSave` functions and `afterDelete` functions, which don't call `success`/`error`, Cloud Code will wait for all network requests to finish.
@@ -306,6 +337,8 @@ Parse.Cloud.define("ThisFunctionWillReturnAllData", function(request, response) 
 
 });
 ```
+
+HTTP requests have a maximum timeout of 1 minute. This timeout can be further restricted by the maximum timeout for the type of Cloud Code being executed as decribed in the [timeouts](#cloud-code-timeouts) section. For instance, HTTP requests in Cloud Functions are limited to 15 seconds, HTTP requests in before/after save triggers are limited to 3 seconds, etc.
 
 ## Logging from Cloud Code
 

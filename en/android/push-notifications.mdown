@@ -2,13 +2,13 @@
 
 Push notifications are a great way to keep your users engaged and informed about your app. You can reach your entire user base quickly and effectively. This guide will help you through the setup process and the general usage of Parse to send push notifications.
 
-If you haven't installed the SDK yet, [head over to the Push QuickStart](/apps/quickstart_push) to get our SDK up and running.
+If you haven't installed the SDK yet, [head over to the Push QuickStart](https://github.com/ParsePlatform/parse-server/wiki/Push#quick-start) to get our SDK up and running.
 
 ## Setting Up Push
 
-If you want to start using push, start by completing the [Android Push tutorial](/tutorials/android-push-notifications) to learn how to configure your app. Come back to this guide afterwards to learn more about the push features offered by Parse.
+If you want to start using push, start by completing the [Android Push Notifications QuickStart Guide](https://github.com/ParsePlatform/parse-server/wiki/Push#quick-start) to learn how to configure your app and send your first push notification. Come back to this guide afterwards to learn more about the push features offered by Parse.
 
-The Parse library provides push notifications using Google Cloud Messaging (GCM) if possible. On devices that do not support GCM (such as Amazon Kindle Fire), Parse will use a background service that maintains a persistent connection to the Parse cloud to deliver pushes. This allows Parse Push to work on all devices running Android 2.3 or higher.
+The Parse library provides push notifications using Google Cloud Messaging (GCM) if Google Play Services are available. Learn more about Google Play Services [here](https://developers.google.com/android/guides/overview).
 
 When sending pushes to Android devices with GCM, there are several pieces of information that Parse keeps track of automatically:
 
@@ -50,7 +50,7 @@ While it is possible to modify a `%{ParseInstallation}` just like you would a `%
 *   **`channels`**: An array of the channels to which a device is currently subscribed.
 *   **`installationId`**: Unique Id for the device used by Parse _(readonly)_.
 *   **`deviceType`**: The type of device, "ios", "osx", "android", "winrt", "winphone", "dotnet", or "embedded". On Android devices, this field will be set to "android" _(readonly)_.
-*   **`pushType`**: This field is reserved for directing Parse to the push delivery network to be used. If the device is registered to receive pushes via GCM, this field will be marked "gcm". If this device is not using GCM, and is using Parse's push notification service, it will be blank _(readonly)_.
+*   **`pushType`**: This field is reserved for directing Parse to the push delivery network to be used. If the device is registered to receive pushes via GCM, this field will be marked "gcm". If Google Play Services is not available, it will be blank _(readonly)_.
 *   **`GCMSenderId`**: This field only has meaning for Android `%{ParseInstallation}`s that use the GCM push type. It is reserved for directing Parse to send pushes to this installation with an alternate GCM sender ID. This field should generally not be set unless you are uploading installation data from another push provider. If you set this field, then you must set the GCM API key corresponding to this GCM sender ID in your Parse application's push settings.
 *   **`deviceToken`**: The token used by GCM to keep track of registration ID. On iOS devices, this is the Apple generated token _(readonly)_.
 *   **`appName`**: The display name of the client application to which this installation belongs. This value is synchronized every time an `%{ParseInstallation}` object is saved from the device  _(readonly)_.
@@ -166,7 +166,7 @@ installation.saveInBackground();
 
 #### Sending Pushes to Queries
 
-Once you have your data stored on your `%{ParseInstallation}` objects, you can use a `PFQuery` to target a subset of these devices. `%{ParseInstallation}` queries work just like any other [Parse query](#queries), but we use the special static method `ParseInstallation.getQuery()` to create it. We set this query on our `ParsePush` object, before sending the notification.
+Once you have your data stored on your `%{ParseInstallation}` objects, you can use a `%{ParseQuery}` to target a subset of these devices. `%{ParseInstallation}` queries work just like any other [Parse query](#queries), but we use the special static method `ParseInstallation.getQuery()` to create it. We set this query on our `ParsePush` object, before sending the notification.
 
 ```java
 // Create our Installation query
@@ -321,32 +321,29 @@ wpPush.sendPushInBackground();
 
 ## Scheduling Pushes
 
-Sending scheduled push notifications is not currently supported by the Android SDK. Take a look at the [REST API](/docs/rest/guide#push-notifications-scheduling-pushes), [JavaScript SDK](/docs/js/guide#push-notifications-scheduling-pushes) or the Parse.com push console.
+Sending scheduled push notifications is not currently supported by the Android SDK. Take a look at the [REST API](/docs/rest/guide#push-notifications-scheduling-pushes), [JavaScript SDK](/docs/js/guide#push-notifications-scheduling-pushes) or the push console on your Parse Dashboard.
 
 ## Receiving Pushes
 
-When a push notification is received, the “title” is displayed in the status bar and the “alert” is displayed alongside the “title” when the user expands the notification drawer.
+Make sure you've gone through the [Android Push QuickStart](https://github.com/ParsePlatform/parse-server/wiki/Push#quick-start) to set up your app to receive pushes.
 
-Make sure you've gone through the [Android Push QuickStart](/apps/quickstart_push) to set up your app to receive pushes. The quickstart shows you how to set up push for all Android devices, including ones that do not support GCM. If you are only pushing to GCM-enabled devices, you can remove these elements from your `AndroidManifest.xml`:
+When a push notification is received, the “title” is displayed in the status bar and the “alert” is displayed alongside the “title” when the user expands the notification drawer. If you choose to subclass `com.parse.ParsePushBroadcastReceiver`, be sure to replace that name with your class' name in the registration.
 
-* The `receiver` element for `com.parse.ParseBroadcastReceiver` (including the intent filter for `BOOT_COMPLETED` and `USER_PRESENT`)
-* The `permission` element for `android.permission.RECEIVE_BOOT_COMPLETED`
-
-You will still need all the other elements (including the one for `com.parse.PushService`) as described in the quickstart. If you choose to subclass `com.parse.ParsePushBroadcastReceiver`, be sure to replace that name with your class' name in the registration.
-
-Note that some Android emulators (the ones missing Google API support) don't support GCM, so if you test your app in an emulator with this type of configuration make sure to select an emulator image that has Google APIs installed.
+Note that some Android emulators (the ones without Google API support) don't support GCM, so if you test your app in an emulator make sure to select an emulator image that has Google APIs installed.
 
 ### Customizing Notifications
 
+Now that your app is all set up to receive push notifications, you can start customizing the display of these notifications.
+
 #### Customizing Notification Icons
 
-The [Android style guide](http://developer.android.com/design/style/iconography.html#notification) recommends apps use a push icon that is monochromatic and flat. The default push icon is your application's launcher icon, which is unlikely to conform to the style guide. To provide a custom push icon, add the following metadata tag to your app's AndroidManifest.xml:
+The [Android style guide](https://www.google.com/design/spec/style/icons.html#notification) recommends apps use a push icon that is monochromatic and flat. The default push icon is your application's launcher icon, which is unlikely to conform to the style guide. To provide a custom push icon, add the following metadata tag to your app's `AndroidManifest.xml`:
 
 ```java
 <meta-data android:name="com.parse.push.notification_icon" android:resource="@drawable/push_icon"/>
 ```
 
-where `push_icon` is the name of a drawable resource in your package. If your application needs more than one small icon, you can override `getSmallIconId` in your `ParsePushBroadcastReceiver` subclass.
+...where `push_icon` is the name of a drawable resource in your package. If your application needs more than one small icon, you can override `getSmallIconId` in your `ParsePushBroadcastReceiver` subclass.
 
 If your push has a unique context associated with an image, such as the avatar of the user who sent a message, you can use a large push icon to call attention to the notification. When a notification has a large push icon, your app's static (small) push icon is moved to the lower right corner of the notification and the large icon takes its place. See the [Android UI documentation](http://developer.android.com/guide/topics/ui/notifiers/notifications.html#NotificationUI) for examples. To provide a large icon, you can override `getLargeIcon` in your `ParsePushBroadcastReceiver` subclass.
 
@@ -362,7 +359,7 @@ If you provide a "uri" field in your push, the `ParsePushBroadcastReceiver` will
 
 The push lifecycle has three phases:
 
-1.  A notification is received and the `com.parse.push.intent.OPEN` Intent is fired, causing the `ParsePushBroadcastReceiver` to call `onPushReceive`. If either "alert" or "title" are specified in the push, then a Notification is constructed using `getNotification`. This Notification uses a small icon generated using `getSmallIconId`, which defaults to the icon specified by the `com.parse.push.notification_icon` metadata in your AndroidManifest.xml. The Notification's large icon is generated from `getLargeIcon` which defaults to null. The notification's `contentIntent` and `deleteIntent` are `com.parse.push.intent.OPEN` and `com.parse.push.intent.DELETE` respectively.
+1.  A notification is received and the `com.parse.push.intent.OPEN` Intent is fired, causing the `ParsePushBroadcastReceiver` to call `onPushReceive`. If either "alert" or "title" are specified in the push, then a Notification is constructed using `getNotification`. This Notification uses a small icon generated using `getSmallIconId`, which defaults to the icon specified by the `com.parse.push.notification_icon` metadata in your `AndroidManifest.xml`. The Notification's large icon is generated from `getLargeIcon` which defaults to null. The notification's `contentIntent` and `deleteIntent` are `com.parse.push.intent.OPEN` and `com.parse.push.intent.DELETE` respectively.
 2.  If the user taps on a Notification, the `com.parse.push.intent.OPEN` Intent is fired. The `ParsePushBroadcastReceiver` calls `onPushOpen`. The default implementation automatically sends an analytics event back to Parse tracking that this notification was opened. If the push contains a "uri" parameter, an activity is launched to navigate to that URI, otherwise the activity returned by `getActivity` is launched.
 3.  If the user dismisses a Notification, the `com.parse.push.intent.DELETE` Intent is fired. The `ParsePushBroadcastReceiver` calls `onPushDismiss`, which does nothing by default
 
@@ -376,7 +373,7 @@ The default implementation of `onPushOpen` will automatically track user engagme
 ParseAnalytics.trackAppOpened(getIntent());
 ```
 
-To track push opens, you should always pass the `Intent` to `trackAppOpened`. Passing null to `trackAppOpened` will track _only_ a standard app-opened event, not the push-opened event. If you don't track the push-opened event, you will not be able to use advanced analytics features such as push-open graphs and A/B testing.
+To track push opens, you should always pass the `Intent` to `trackAppOpened`. Passing `null` to `trackAppOpened` will track _only_ a standard app-opened event, not the push-opened event. If you don't track the push-opened event, you will not be able to use advanced analytics features such as push-open graphs and A/B testing.
 
 Please be sure to set up your application to [save the Installation object](#push-notifications-installations). Push open tracking only works when your application's devices are associated with saved `Installation` objects.
 
@@ -443,7 +440,7 @@ It's important to break down the system into components when troubleshooting pus
 * Are your devices registering for push notifications?
 * Is your app set up to receive these notifications?
 
-If the answer is Yes to all of these questions, there may be an operational issue that is affecting the delivery of push notifications. You can see the current status of the platform in our [status page](https://status.parse.com). If everything looks green, please [create a bug report](/help#report) with more information. Every bug report opened against the push notification category will be redirected to this troubleshooting guide unless it includes evidence of having gone through these steps, so please be as verbose as possible.
+If the answer is Yes to all of these questions, there may be an operational issue that is affecting the delivery of push notifications. You can see the current status of the platform in our [status page](https://status.parse.com). If everything looks green, please [create a bug report](https://parse.com/help#report) with more information. Every bug report opened against the push notification category will be redirected to this troubleshooting guide unless it includes evidence of having gone through these steps, so please be as verbose as possible.
 
 If you're unsure about the answer to any of the above questions, read on!
 
@@ -514,9 +511,9 @@ You can check the Push Delivery Report for the cause of failed deliveries: Misma
 If everything looks great so far, but push notifications are not showing up on your phone, there are a few more things you can check.
 
 *   [Upgrade to the latest SDK](/docs/downloads). This documentation covers the push API introduced in the 1.7.0 version of the Android Parse SDK. Please upgrade if you are getting compiler errors following these instructions.
-*   Make sure you are using the correct Package name in your Android manifest file.
-*   Make sure you have the correct permissions listed in your `AndroidManifest.xml` file, as outlined in the [Android Push Quickstart](/apps/quickstart_push#android/native/existing). If you are using a a custom receiver, be sure you have registered it in the Manifest file with the correct `android:name` property and the proper intent filters.
-*   Make sure you've used the correct App ID and client key, and that `Parse.initialize()` is being called. `Parse.initialize()` lets the service know which application it is listening for; we suggest putting this code in the `Application.onCreate` rather than the `onCreate` method for a particular Activity, so that any activation technique will know how to use Parse.
+*   Make sure you are using the correct `packageName` in your `AndroidManifest.xml`.
+*   Make sure you have the correct permissions listed in your `AndroidManifest.xml` file, as outlined in the [Android Push Quickstart](https://github.com/ParsePlatform/parse-server/wiki/Push#quick-start). If you are using a a custom receiver, be sure you have registered it in the Manifest file with the correct `android:name` property and the proper intent filters.
+*   Make sure you've used the correct App ID and client key, and that `Parse.initialize()` is being called. `Parse.initialize()` lets the service know which application it is listening for; this code must be in your `Application.onCreate` rather than `Activity.onCreate` for a particular `Activity`, so that any activation technique will know how to use Parse.
 *   Check that the push registration call is being called successfully. Your device must successfully register a %{ParseInstallation} object with a valid GCM Registration id in the "deviceToken" field, if using GCM.
 *   Check that the device is set to accept push notifications from your app.
 *   Note that, by design, force-killed apps will not be able to receive push notifications. Launch the app again to reenable push notifications.

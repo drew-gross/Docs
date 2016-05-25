@@ -2,11 +2,11 @@
 
 Push Notifications are a great way to keep your users engaged and informed about your app. You can reach your entire user base quickly and effectively. This guide will help you through the setup process and the general usage of Parse to send push notifications.
 
-If you haven't installed the SDK yet, please [head over to the Push QuickStart](/apps/quickstart_push) to get our SDK up and running.
+If you haven't installed the SDK yet, please [head over to the Push QuickStart](https://github.com/ParsePlatform/parse-server/wiki/Push#quick-start) to get our SDK up and running.
 
 ## Setting Up Push
 
-If you want to start using push, start by completing the [Push Tutorial](/tutorials/ios-push-notifications) to learn how to configure your app. Come back to this guide afterwards to learn more about the push features offered by Parse.
+If you want to start using push, start by completing the [Push Notifications QuickStart](https://github.com/ParsePlatform/parse-server/wiki/Push#quick-start) to learn how to configure your app. Come back to this guide afterwards to learn more about the push features offered by Parse.
 
 ## Installations
 
@@ -23,7 +23,7 @@ UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTy
 [application registerForRemoteNotifications];
 ```
 ```swift
-let userNotificationTypes = (UIUserNotificationType.Alert |  UIUserNotificationType.Badge |  UIUserNotificationType.Sound);
+let userNotificationTypes: UIUserNotificationType = [.Alert, .Badge, .Sound]
 
 let settings = UIUserNotificationSettings(forTypes: userNotificationTypes, categories: nil)
 application.registerUserNotificationSettings(settings)
@@ -99,7 +99,7 @@ PFInstallation *currentInstallation = [PFInstallation currentInstallation];
 ```swift
 // When users indicate they are Giants fans, we subscribe them to that channel.
 let currentInstallation = PFInstallation.currentInstallation()
-currentInstallation.addUniqueObject("Giants" forKey: "channels")
+currentInstallation.addUniqueObject("Giants", forKey: "channels")
 currentInstallation.saveInBackground()
 ```
 
@@ -118,7 +118,7 @@ PFInstallation *currentInstallation = [PFInstallation currentInstallation];
 ```swift
 // When users indicate they are Giants fans, we subscribe them to that channel.
 let currentInstallation = PFInstallation.currentInstallation()
-currentInstallation.removeObject("Giants" forKey: "channels")
+currentInstallation.removeObject("Giants", forKey: "channels")
 currentInstallation.saveInBackground()
 ```
 
@@ -217,12 +217,12 @@ installation.saveInBackground()
 
 #### Sending Pushes to Queries
 
-Once you have your data stored on your `Installation` objects, you can use a `PFQuery` to target a subset of these devices. `Installation` queries work just like any other [Parse query](#queries), but we use the special static method `[PFInstallation query]` to create it. We set this query on our `PFPush` object, before sending the notification.
+Once you have your data stored on your `Installation` objects, you can use a `%{ParseQuery}` to target a subset of these devices. `Installation` queries work just like any other [Parse query](#queries), but we use the special static method `[PFInstallation query]` to create it. We set this query on our `PFPush` object, before sending the notification.
 
 ```objc
 // Create our Installation query
 PFQuery *pushQuery = [PFInstallation query];
-[pushQuery whereKey:@"injuryReports" equalTo:YES];
+[pushQuery whereKey:@"injuryReports" equalTo:@YES];
 
 // Send push notification to query
 PFPush *push = [[PFPush alloc] init];
@@ -248,7 +248,7 @@ We can even use channels with our query. To send a push to all subscribers of th
 // Create our Installation query
 PFQuery *pushQuery = [PFInstallation query];
 [pushQuery whereKey:@"channels" equalTo:@"Giants"]; // Set channel
-[pushQuery whereKey:@"scores" equalTo:YES];
+[pushQuery whereKey:@"scores" equalTo:@YES];
 
 // Send push notification to query
 PFPush *push = [[PFPush alloc] init];
@@ -576,7 +576,7 @@ func application(application: UIApplication, didFinishLaunchingWithOptions launc
 
       // Create a pointer to the Photo object
       let photoId = notificationPayload["p"] as? NSString
-      let targetPhoto = PFObject(withoutDataWithClassName: "Photo", objectId: "xWMyZ4YEGZ")
+      let targetPhoto = PFObject(withoutDataWithClassName: "Photo", objectId: photoId)
 
       // Fetch photo object
       targetPhoto.fetchIfNeededInBackgroundWithBlock {
@@ -610,7 +610,7 @@ If your app is already running when the notification is received, the data is ma
       [self.navController pushViewController:viewController animated:YES];
       handler(UIBackgroundFetchResultNewData);
     } else {
-      handler(UIBackgroundModeNoData);
+      handler(UIBackgroundFetchResultNoData);
     }
   }];
 }
@@ -821,7 +821,7 @@ It's important to break down the system into components when troubleshooting pus
 * Are your devices registering for push notifications?
 * Is your app set up to receive these notifications?
 
-If the answer is Yes to all of these questions, there may be an operational issue that is affecting the delivery of push notifications. You can see the current status of the platform in our [status page](https://status.parse.com). If everything looks green, please [create a bug report](/help#report) with more information. Every bug report opened against the push notification category will be redirected to this troubleshooting guide unless it includes evidence of having gone through these steps, so please be as verbose as possible.
+If the answer is Yes to all of these questions, there may be an operational issue that is affecting the delivery of push notifications. You can see the current status of the platform in our [status page](https://status.parse.com). If everything looks green, please [create a bug report](https://parse.com/help#report) with more information. Every bug report opened against the push notification category will be redirected to this troubleshooting guide unless it includes evidence of having gone through these steps, so please be as verbose as possible.
 
 If you're unsure about the answer to any of the above questions, read on!
 
@@ -846,11 +846,11 @@ If the push notification campaign is not showing up on that list, the issue is q
 push.sendPushInBackgroundWithBlock {
     (success: Bool , error: NSError?) -> Void in
     if (success) {
-        println("The push campaign has been created.");
+        print("The push campaign has been created.");
     } else if (error!.code == 112) {
-        println("Could not send push. Push is misconfigured: \(error!.description).");
+        print("Could not send push. Push is misconfigured: \(error!.description).");
     } else {
-        println("Error sending push: \(error!.description).");
+        print("Error sending push: \(error!.description).");
     }
 }
 ```
